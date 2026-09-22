@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>журнал аварий</title>
+<style>
+
+* {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;}
+
+body {
+	background: #f4f6f9;
+	color: #1a1a2e;
+	font-family: Arial, sans-serif;
+	font-size: 15px;}
+
+.header {
+	background: #1a2235;
+	color: white;
+	padding: 14px 30px;
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	justify-content: space-between;}
+
+.header-title {
+	font-size: 25px;
+	font-weight: bold;
+	letter-spacing: 0.1em;
+	color: #7a9abf;}
+
+.btn {
+	padding: 7px 18px;
+	font-size: 20px;
+	font-weight: bold;
+	border: none;
+	border-radius: 10px;
+	cursor: pointer;
+	transition: 0.15s;
+	text-decoration: none;
+	display: inline-block;}
+
+.btn-ochist {
+	padding: 7px 18px;
+	font-size: 15px;
+	font-weight: bold;
+	border: 1px solid #c8d0df;
+	box-shadow: none;
+	outline: none;
+	border-radius: 10px;
+	cursor: pointer;
+	transition: 0.15s;
+	text-decoration: none;
+	display: inline-block;
+	background: white;
+	color: #1a1a2e;}
+
+.btn:hover { opacity: 0.85; }
+.btn-monitor, .btn-log { background: #2a3550; color: #e8eefc; }
+
+.underhead {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 12px 30px;
+	background: white;
+	border-bottom: 1px solid #dde3ed;
+	flex-wrap: wrap;}
+
+.underhead input {
+	border: 1px solid #c8d0df;
+	background: white;
+	color: #1a1a2e;
+	padding: 6px 10px;
+	border-radius: 10px;
+	font-size: 13px;
+	outline: none;
+	width: 200px;}
+
+.underhead input:focus { border-color: #4cc9f0; }
+.underhead input::placeholder { color: #1a1a2e; }
+
+.counter {
+	margin-left: auto;
+	font-size: 10px;
+	color: #7a9abf;}
+
+.statists {
+	display: flex;
+	background: #dde3ed;
+	border-bottom: 2px solid #dde3ed;}
+
+.statists-box {
+	background: white;
+	padding: 10px 20px;
+	text-align: center;
+	flex: 1;}
+
+.statists-num {
+	font-size: 24px;
+	font-weight: bold;
+	color: #1a2235;}
+
+.statists-text {
+	font-size: 10px;
+	color: #7a9abf;
+	letter-spacing: 0.08em;
+	margin-top: 2px;}
+
+.tabl-skroll {
+	overflow-y: auto;
+	max-height: calc(100vh - 200px);}
+
+table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 12px;
+	min-width: 900px;}
+
+thead th {
+	background: #e8edf5;
+	color: #3a4a6a;
+	padding: 8px 10px;
+	text-align: center;
+	border-bottom: 2px solid #c8d0df;
+	border-right: 1px solid #d0d8e8;
+	font-size: 10px;
+	letter-spacing: 0.07em;
+	font-weight: bold;
+	position: sticky;
+	top: 0;
+	z-index: 1;
+	white-space: nowrap;}
+
+thead th.left { text-align: left; }
+
+tbody tr { border-bottom: 1px solid #eaeef5; background: white;}
+tbody tr:hover { background: #f0f4fb; }
+
+
+td {
+	padding: 7px 10px;
+	vertical-align: middle;
+	border-right: 1px solid #eaeef5;
+	text-align: center;}
+
+td.left { text-align: left; }
+
+.id-col   { color: #aab5c8; font-size: 11px; width: 45px; }
+.time-col { color: #3a4a6a; font-family: monospace; white-space: nowrap; }
+.opis-col { color: #1a1a2e; text-align: left; }
+.oper-col { color: #3a4a6a; font-weight: bold; }
+
+.znach-col {
+	font-family: monospace;
+	font-size: 12px;
+	font-weight: bold;
+	color: #3a4a6a;}
+
+.znach-empty { color: #c0c8d8; }
+
+.badge {
+	display: inline-block;
+	padding: 2px 8px;
+	border-radius: 4px;
+	font-size: 10px;
+	font-weight: bold;
+	letter-spacing: 0.05em;}
+
+.badge-emerg {
+	background: #fde8e8;
+	color: #7a0000;
+	border: 1px solid #e88888;}
+
+</style>
+</head>
+<body>
+
+<div class="header">
+	<div>
+		<div class="header-title">🚨 ЖУРНАЛ АВАРИЙ</div>
+	</div>
+	<div style="display:flex; gap:16px; flex-shrink:0;">
+		<button class="btn btn-monitor" onclick="window.open('/','monitoring_tab')">← мониторинг</button>
+		<a class="btn btn-log" href="/log" target="_blank">журнал событий</a>
+	</div>
+</div>
+
+<div class="underhead">
+	<input type="text" id="search" placeholder="🔍  Поиск..." oninput="alarmFunction()">
+	<button class="btn-ochist" onclick="clearAlarms()">
+		🗑 Очистить журнал
+	</button>
+	<span class="counter" id="counter">загрузка...</span>
+</div>
+
+<div class="statists">
+	<div class="statists-box">
+		<div class="statists-text">ВСЕГО АВАРИЙ</div>
+		<div class="statists-num" id="s-all" style="color:#7a0000">0</div>
+	</div>
+	<div class="statists-box">
+		<div class="statists-text">МАКС. ДАВЛЕНИЕ</div>
+		<div class="statists-num" id="s-maxp">—</div>
+	</div>
+	<div class="statists-box">
+		<div class="statists-text">МАКС. УРОВЕНЬ</div>
+		<div class="statists-num" id="s-maxl">—</div>
+	</div>
+	<div class="statists-box">
+		<div class="statists-text">МАКС. КОНЦЕНТРАЦИЯ</div>
+		<div class="statists-num" id="s-maxc">—</div>
+	</div>
+	<div class="statists-box">
+		<div class="statists-text">МАКС. ТЕМПЕРАТУРА</div>
+		<div class="statists-num" id="s-maxt">—</div>
+	</div>
+</div>
+
+<div class="tabl-skroll">
+<table>
+	<thead>
+		<tr>
+			<th class="left">#</th>
+			<th class="left">ВРЕМЯ</th>
+			<th class="left">ОПИСАНИЕ</th>
+			<th class="left">ОПЕРАТОР</th>
+			<th>P<br><small>бар</small></th>
+			<th>L<br><small>%</small></th>
+			<th>T<br><small>°C</small></th>
+			<th>C<br><small>—</small></th>
+			<th>СТАТУС</th>
+		</tr>
+	</thead>
+	<tbody id="tablbody"></tbody>
+</table>
+</div>
+
+<script>
+
+let allData = [];
+
+function strokZnach(str, key){
+  	if(!str) return null;
+  	const m = str.match(new RegExp(key + '=([\\d.]+)'));
+  	return m ? parseFloat(m[1]) : null;}
+
+function cell(val, decimals){
+  	if(val === null) return '<td class="znach-empty">—</td>';
+  	return `<td class="znach-col">${val.toFixed(decimals)}</td>`;}
+
+async function clearAlarms(){
+  	await fetch('/api/clear_alarms', {method:'POST'});
+  	allData = [];
+  	alarmFunction();}
+
+async function load(){
+  	const r = await fetch('/api/alarms');
+  	allData = await r.json();
+  	alarmFunction();}
+
+// записывает в плитку максимум массива с нужным суффиксом, либо «—»
+function setMax(id, arr, decimals, suffix){
+  	document.getElementById(id).innerText =
+  		arr.length ? Math.max(...arr).toFixed(decimals) + suffix : '—';}
+
+function alarmFunction(){
+  	const qtext = document.getElementById('search').value.toLowerCase();
+
+  	const filterList = allData.filter(e =>
+  		!qtext ||
+  		(e.description || '').toLowerCase().includes(qtext) ||
+  		(e.timestamp   || '').toLowerCase().includes(qtext) ||
+  		(e.operator    || '').toLowerCase().includes(qtext)
+  	).reverse();
+
+  	document.getElementById('counter').innerText = filterList.length + ' записей';
+  	document.getElementById('s-all').innerText = allData.length;
+
+  	// собираем все числовые значения P/L/T/C из всех аварий за один проход
+  	const znach = {P:[], L:[], T:[], C:[]};
+  	allData.forEach(e => {
+  		const zn = e.value || '';
+  		['P','L','T','C'].forEach(k => {
+  			const x = strokZnach(zn, k);
+  			if(x !== null) znach[k].push(x);});});
+
+  	setMax('s-maxp', znach.P, 2, ' бар');
+  	setMax('s-maxl', znach.L, 1, ' %');
+  	setMax('s-maxt', znach.T, 1, ' °C');
+  	setMax('s-maxc', znach.C, 3, '');
+
+  	document.getElementById('tablbody').innerHTML = filterList.map(e => {
+  		const zn = e.value || '';
+  		const p = strokZnach(zn, 'P');
+  		const l = strokZnach(zn, 'L');
+  		const t = strokZnach(zn, 'T');
+  		const c = strokZnach(zn, 'C');
+  		return `<tr>
+  			<td class="id-col left">${e.id}</td>
+  			<td class="time-col left">${e.timestamp}</td>
+  			<td class="opis-col">${e.description || '—'}</td>
+  			<td class="oper-col left">${e.operator || '—'}</td>
+  			${cell(p, 2)}
+  			${cell(l, 1)}
+  			${cell(t, 1)}
+  			${cell(c, 3)}
+  			<td><span class="badge badge-emerg">АВАРИЯ</span></td>
+  		</tr>`;}).join('');}
+
+load();
+setInterval(load, 2000);
+
+</script>
+</body>
+</html>

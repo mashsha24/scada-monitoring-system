@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>мониторинг</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body{
+	margin:0;
+	background:#081120;
+  	color:white;
+  	font-family:Arial;
+	zoom: 0.5;}
+h1{
+  	text-align:center;
+  	font-size:48px;
+  	margin:30px;}
+.page{
+  	display:flex;
+  	align-items:flex-start;
+  	gap:250px;}
+.left{
+  	width:530px;
+  	display:flex;
+  	margin-left:250px;}
+
+#kolonna{
+  	position:relative;
+  	width:850px;}
+
+.base{
+  	width:100%;}
+.sloy{
+  	position:absolute;
+  	top:0;
+  	left:0;
+  	width:100%;
+  	display:none;}
+.znach{
+  	position:absolute;
+  	left:50%;
+  	transform:translateX(-50%);
+  	font-size:45px;
+  	font-weight:bold;
+  	color:black;}
+#T{ top:17%; }
+#P{ top:44%; }
+#L{ top:73%; }
+
+.right{
+ 	flex:1;
+  	display:flex;
+  	gap:110px;}
+.grafics{
+  	width:950px;
+  	display:flex;
+  	flex-direction:column;
+  	gap:80px;}
+.graficsram{
+  	background:#081120;
+  	padding:20px;
+  	border-radius:25px;
+ 	border: 1px solid rgba(0,200,255,0.2);  
+  	box-shadow: 0 0 25px rgba(0,0,0,0.6);}
+canvas{
+  	width:100%;
+  	height:2800px;
+	background: #081120;
+  	border-radius: 10px;}
+
+.uprav{
+  	width:550px;
+  	background:#081120;
+  	padding:0px;
+  	border-radius:16px;
+  	display:flex;
+  	flex-direction:column;
+	margin-right:200px;
+  	gap:35px;}
+.uprav-box{
+  	text-align:center;
+ 	margin-bottom:50px;}
+.uprav-box label{
+  	font-size:30px;
+  	margin-bottom:30px;
+  	display:block;}
+
+input[type="range"]{
+  	-webkit-appearance:none;
+  	width:100%;
+  	height:20px;
+  	border-radius:10px;
+  	background:linear-gradient(to right, red 50%, #ddd 50%);
+  	outline:none;}
+input[type="range"]::-webkit-slider-thumb{
+  	-webkit-appearance:none;
+  	width:26px;
+  	height:26px;
+  	border-radius:50%;
+  	background:#FFFFFF;
+  	cursor:pointer;}
+input[type="range"]::-moz-range-thumb{
+  	width:26px;
+  	height:26px;
+  	border-radius:50%;
+  	background:gold;}
+
+.dp-box{
+  	margin-top:20px;}
+#dp-text{
+  	font-size:22px;
+  	margin-top:5px;
+  	color:#e8eefc;}
+#dp-graf{
+  	width:100%;
+  	height:80px !important;
+  	margin-top:10px;}
+
+.recomend{
+  	padding: 50px 0px;}
+.recomend-title, .eff-title{
+  	font-size:25px;
+  	color:#4cc9f0;
+  	opacity:0.7;
+  	margin-bottom:6px;}
+.eff-title{
+  	margin-bottom:8px;}
+#recomend-text{
+  	font-size:25px;
+  	line-height:1.4;
+  	color:#e8eefc;}
+
+.eff-box{
+  	margin-top:35px;}
+.eff-fon{
+  	width:100%;
+  	height:20px;
+  	background:#2a3550;
+  	border-radius:10px;
+  	overflow:hidden;}
+#eff-zaliv{
+ 	height:100%;
+  	width:0%;
+  	background:linear-gradient(90deg, #4cc9f0, #32CD32);
+  	transition:0.3s;}
+#eff-text{
+  	margin-top:6px;
+  	font-size:18px;}
+
+.emergency-btn, .journal-btn{
+  	width:100%;
+  	border:none;
+  	border-radius:25px;
+  	cursor:pointer;
+  	font-weight:bold;
+  	transition:0.2s;}
+.emergency-btn{
+  	padding:45px;
+  	font-size:40px;
+  	background:#ff2e4d;}
+.emergency-btn:hover{
+  	transform:scale(1.05);}
+
+.journal-btn{
+  	padding:35px;
+  	font-size:28px;
+  	background:#1a2235;
+  	color:#e8eefc;
+  	margin-top:20px;}
+.journal-btn:hover{
+  	transform:scale(1.03);
+  	background:#24304d;}
+
+.sp-buttons{
+	display:flex;
+	gap:15px;
+	margin-top:15px;}
+.sp-btn{
+	flex:1;
+	padding:28px;
+	border:none;
+	border-radius:20px;
+	font-size:24px;
+	font-weight:bold;
+	cursor:pointer;
+	transition:0.2s;
+	color:white;}
+.sp-btn:hover{
+	transform:scale(1.03);}
+
+.start-btn, .pause-btn{
+	background:#1a2235;}
+
+.time-box{
+  	margin-top:30px;
+  	font-size:20px;
+  	color:#9fb3d9;
+	text-align:right;}
+.buttons{
+  	display:flex;
+  	flex-direction:column;
+  	gap:15px;
+  	margin-top:75px;}
+
+.vhod {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: rgba(0,0,0,0.7);
+	z-index: 999;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.vhod-box {
+	background: #0d1e30;
+	border: 1px solid rgba(0,200,255,0.2);
+	border-radius: 16px;
+	padding: 50px;
+	text-align: center;
+	width: 600px;
+}
+
+.vhod-title {
+	font-size: 50px;
+	color: white;
+	margin-bottom: 50px;
+	letter-spacing: 0.1em;}
+
+.vhod-sub {
+	font-size: 30px;
+	color: #9fb3d9;
+	margin-bottom: 16px;}
+
+.vhod-input {
+	width: 50%;
+	padding: 20px;
+	border-radius: 8px;
+	border: 1px solid rgba(0,200,255,0.3);
+	background: #081120;
+	color: white;
+	font-size: 20px;
+	outline: none;
+	margin-bottom: 16px;}
+
+.vhod-error {
+	color: white;
+	font-size: 20px;
+	margin-bottom: 16px;}
+
+.vhod-btn {
+	width: 57%;
+	padding: 15px;
+	background: #87CEEB;
+	border: none;
+	border-radius: 8px;
+	font-size: 20px;
+	font-weight: bold;
+	color: #081120;
+	cursor: pointer;}
+
+</style>
+</head>
+<body>
+<div id="vhod" class="vhod">
+  <div class="vhod-box">
+    <div class="vhod-title">ВХОД В СИСТЕМУ</div>
+    <div class="vhod-sub">введите ID оператора</div>
+    <input id="operator-vvod" class="vhod-input" type="text" placeholder="ID оператора"autocomplete="off">
+    <div id="operator-error" class="vhod-error"></div>
+    <button class="vhod-btn" onclick="loginOperator()">ВОЙТИ</button>
+  </div>
+</div>
+
+<h1>МОНИТОРИНГ КОЛОННЫ</h1>
+
+<div class="page">
+
+<div class="left">
+<div id="kolonna">
+
+<img src="/static/column.svg" class="base">
+<img src="/static/temp_green.svg" id="tg" class="sloy">
+<img src="/static/temp_yellow.svg" id="ty" class="sloy">
+<img src="/static/temp_red.svg" id="tr" class="sloy">
+<img src="/static/press_green.svg" id="pg" class="sloy">
+<img src="/static/press_yellow.svg" id="py" class="sloy">
+<img src="/static/press_red.svg" id="pr" class="sloy">
+<img src="/static/level_green.svg" id="lg" class="sloy">
+<img src="/static/level_yellow.svg" id="ly" class="sloy">
+<img src="/static/level_red.svg" id="lr" class="sloy">
+
+<div id="T" class="znach"></div>
+<div id="P" class="znach"></div>
+<div id="L" class="znach"></div>
+</div>
+</div>
+
+<div class="right">
+
+<div class="grafics">
+<div class="graficsram">
+<canvas id="rashod"></canvas>
+</div>
+<div class="graficsram">
+<canvas id="conc"></canvas>
+</div>
+</div>
+
+<div class="uprav">
+
+<div class="graficsram">
+
+<div class="uprav-box">
+<label>Газ: <span id="gtext">70</span>%</label>
+<input type="range" min="0" max="100" value="70" id="gas">
+</div>
+<div class="uprav-box">
+<label>Жидкость: <span id="ltext">70</span>%</label>
+<input type="range" min="0" max="100" value="70" id="liq">
+</div>
+
+</div>
+<div class="dp-box">
+
+<div class="eff-title">
+ПЕРЕПАД ДАВЛЕНИЯ ΔP
+</div>
+
+<div id="dp-text">
+0.00 БАР
+</div>
+
+
+<div class="recomend">
+
+<div class="recomend-title">
+РЕКОМЕНДАЦИЯ
+</div>
+
+<div id="recomend-text">
+cистема работает стабильно
+</div>
+
+</div>
+
+<div class="eff-box">
+
+<div class="eff-title">
+ЭФФЕКТИВНОСТЬ
+</div>
+
+<div class="eff-fon">
+<div id="eff-zaliv"></div>
+</div>
+
+<div id="eff-text">
+0%
+</div>
+
+
+
+<div class="buttons">
+
+<button class="emergency-btn" onclick="emergency()">
+АВАРИЯ
+</button>
+<button class="journal-btn" onclick="resetSystem()">
+СБРОС
+</button>
+<button class="journal-btn" onclick="goToLog()">
+ЖУРНАЛ СОБЫТИЙ
+</button>
+<button class="journal-btn" onclick="goToAlarms()">
+ЖУРНАЛ АВАРИЙ
+</button>
+<div class="sp-buttons">
+
+<button class="sp-btn start-btn"
+onclick="startMonitoring()">
+СТАРТ
+</button>
+
+<button class="sp-btn pause-btn"
+onclick="pauseMonitoring()">
+ПАУЗА
+</button>
+
+</div>
+
+</div>
+
+
+<div class="time-box">
+ВРЕМЯ РАБОТЫ:
+<span id="work-time">00:00</span>
+</div>
+
+</div>
+</div>
+</div> 
+</div> 
+</div>
+
+<script>
+let currentOperator = 'Оператор';
+
+const ALLOWED = ['1111', '1112']; // список операторов
+
+function loginOperator() {
+  const name = document.getElementById('operator-vvod').value.trim();
+  if (!name) return;
+  
+  if (!ALLOWED.includes(name)) {
+    document.getElementById('operator-error').innerText = 
+      'Доступ запрещён.';
+    return;
+  }
+  
+  currentOperator = name;
+  document.getElementById('vhod').style.display = 'none';
+}
+
+document.getElementById('operator-vvod').addEventListener('keydown', e => {
+  if (e.key === 'Enter') loginOperator();
+});
+window.name = 'monitoring_tab';
+
+let seconds = 0;
+let monitoringStarted = false;
+
+function updateTime(){
+	if(!monitoringStarted){
+		return;}
+	seconds++;
+  	let m = Math.floor(seconds / 60);
+  	let s = seconds % 60;
+  	document.getElementById('work-time').innerText =
+    	String(m).padStart(2,'0') + ":" + String(s).padStart(2,'0');}
+
+function getRecomend(d){
+
+	if(d.status.emergency)
+		return "процесс остановлен";
+
+	const P = d.params.P1;
+	const L = d.params.L1;
+	const C = d.pipe.C;
+	const T = d.params.T1;
+	const eff = d.pipe.eff !== undefined ? d.pipe.eff : 80;
+
+	let hints = [];
+
+	if(P > 1.9 || L > 85 || C > 0.40)
+		return "критические параметры — нажмите АВАРИЯ";
+
+	if(P > 1.6)
+		hints.push("давление высокое — снизить подачу газа");
+	else if(P > 1.5)
+		hints.push("давление растёт — снизить подачу газа");
+
+	if(T > 60)
+		hints.push("высокая температура — возможна перегрузка колонны");
+	else if(T > 45)
+		hints.push("температура растёт — проверить режим абсорбции");
+
+	if(L > 75)
+		hints.push("уровень высокий — уменьшить жидкость");
+	else if(L > 65)
+		hints.push("уровень растёт — уменьшить жидкость");
+	else if(L < 30)
+		hints.push("уровень низкий — увеличить жидкость");
+
+	if(C > 0.2 && L <= 65)
+		hints.push("концентрация высокая — увеличить жидкость");
+
+	if(eff < 60)
+		hints.push("эффективность низкая — проверить соотношение газ/жидкость");
+
+	if(hints.length === 0)
+		return "система работает стабильно";
+
+	return hints.join("<br>");}
+
+const T = document.getElementById('T');
+const P = document.getElementById('P');
+const L = document.getElementById('L');
+const gasSlider = document.getElementById('gas');
+const liqSlider = document.getElementById('liq');
+const gtext = document.getElementById('gtext');
+const ltext = document.getElementById('ltext');
+
+let labels = [];
+let FG = [];
+let FL = [];
+let C = [];
+
+const MAX = 600;
+
+const graf1 = new Chart(document.getElementById('rashod'), {
+	type: 'line',
+	data: {
+		labels: labels, datasets: [{
+        		label: 'FG (м³/ч)',
+        		data: FG,
+        		borderColor: '#E0FFFF',
+        		backgroundColor: '#E0FFFF',
+        		borderWidth: 3,
+        		tension: 0.3,
+        		pointRadius: 0},
+      			{
+        		label: 'FL (л/ч)',
+        		data: FL,
+        		borderColor: '#87CEEB',
+        		backgroundColor: '#87CEEB',
+        		borderWidth: 3,
+        		tension: 0.3,
+        		pointRadius: 0}]},
+  	options: {
+		animation:false,
+    		responsive:true,
+    		maintainAspectRatio:false,
+		scales:{ 
+			x: {
+        			grid: {
+          				display: false},
+        			ticks: {
+   					display: true,
+          				color: '#9fb3d9',
+          				font: { size: 12 }}
+      			},
+      			y: {
+				min: 0,
+        			max: 120,
+        			grid: {
+          				display: true,
+          				color: 'rgba(0,200,255,0.25)'},
+        			ticks: {
+          				stepSize: 20,
+          				display: true,
+          				color: '#9fb3d9',
+          				font: { size: 12 }}
+			}
+    		},
+    		plugins: {
+      			title: {
+				display: true,
+        			text: 'РАСХОД ГАЗА И АБСОРБЕНТА',
+        			color: '#e8eefc',
+        			font: {
+          				size: 22,
+          				weight: 'bold'},
+        			padding: {
+					top: 10,
+          				bottom: 40}
+      			},
+      			legend: {
+        			position: 'right',
+        			labels: {
+          				color: '#e8eefc',
+          				font: {
+						size: 20},
+          				usePointStyle: true,
+          				boxWidth: 14,
+          				boxHeight: 14,
+          				padding: 20}
+      			}
+    		}
+  	}
+});
+const graf2 = new Chart(document.getElementById('conc'), {
+  	type: 'line',
+  	data: {
+    		labels: labels,
+    		datasets: [{
+        		label: 'C_out (мг/м³)',
+        		data: C,
+        		borderColor: '#5F9EA0',
+        		backgroundColor: '#5F9EA0',
+        		borderWidth: 3,
+        		tension: 0.3,
+        		pointRadius: 0}]
+	},
+  	options: {
+    		animation: false,
+    		responsive: true,
+    		maintainAspectRatio: false,
+    		scales: {
+      			x: {
+        			grid: {
+          				display: false},
+        			ticks: {
+			  		display: true,
+          				color: '#9fb3d9',
+          				font: { size: 12 }}
+      			},
+      			y: {
+        			min: 0,
+        			max: 0.6,
+        			grid: {
+          				display: true,
+          				color: 'rgba(0,200,255,0.25)'},
+
+        			ticks: {
+          				stepSize: 0.1,
+          				display: true,
+          				color: '#9fb3d9',
+          				font: { size: 12 }}
+      			}
+
+    		},
+		plugins: {
+      			title: {
+        			display: true,
+        			text: 'КОНЦЕНТРАЦИЯ НА ВЫХОДЕ',
+        			color: '#e8eefc',
+        			font: {
+          				size: 22,
+          				weight: 'bold'},
+        			padding: {
+          				top: 10,
+          				bottom: 40}
+     	 		},
+      			legend: {
+        			position: 'right',
+        			labels: {
+          				color: '#e8eefc',
+          				font: {
+            					size: 20},
+          				usePointStyle: true,
+          				boxWidth: 14,
+          				boxHeight: 14,
+          				padding: 20}
+      			}
+    		}
+  	}
+});
+
+function redrawGrafics(){
+  	graf1.data.labels = labels;
+  	graf1.data.datasets[0].data = FG;
+  	graf1.data.datasets[1].data = FL;
+  	graf2.data.labels = labels;
+  	graf2.data.datasets[0].data = C;
+  	graf1.update();
+  	graf2.update();}
+
+function addData(fg, fl, conc, dp){
+  	FG.push(Number(fg));
+  	FL.push(Number(fl));
+  	C.push(Number(conc));
+  	labels.push(labels.length);
+  	if(labels.length > MAX){
+    		labels.shift();
+    		FG.shift();
+    		FL.shift();
+    		C.shift();}
+  	redrawGrafics();}
+
+async function clearLog(){
+  await fetch('/api/clear_journal', {method:'POST'});
+  allData = [];
+  render();}
+
+function showSloy(status, g, y, r){
+  	if(status === "green") g.style.display = 'block';
+  	else if(status === "yellow") y.style.display = 'block';
+  	else r.style.display = 'block';}
+
+async function upd(){
+  	if(!monitoringStarted) return;
+
+  	const res = await fetch('/data');
+  	const d = await res.json();
+  	document.getElementById('recomend-text').innerHTML = getRecomend(d);
+
+  	T.innerText = "T: " + d.params.T1;
+  	P.innerText = "P: " + d.params.P1;
+  	L.innerText = "L: " + d.params.L1;
+
+  	document.querySelectorAll('.sloy').forEach(e => e.style.display = 'none');
+  	showSloy(d.status.T1, tg, ty, tr);
+  	showSloy(d.status.P1, pg, py, pr);
+  	showSloy(d.status.L1, lg, ly, lr);
+
+  	const dp = d.pipe.dp.toFixed(2);
+  	addData(d.pipe.FG, d.pipe.FL, d.pipe.C, dp);
+  	document.getElementById('dp-text').innerText = dp + " bar";
+
+  	const eff = d.pipe.eff;
+  	const effZaliv = document.getElementById('eff-zaliv');
+  	effZaliv.style.width = eff + "%";
+  	document.getElementById('eff-text').innerText = eff + "%";
+
+  	let color = "#3CB371";
+  	if(eff < 70) color = "#f4d35e";
+  	if(eff < 40) color = "#ff4d6d";
+  	effZaliv.style.background = color;}
+
+gasSlider.oninput = e => {
+   gtext.innerText = e.target.value;
+   updateSlider(gasSlider);};
+
+liqSlider.oninput = e => {
+   ltext.innerText = e.target.value;
+   updateSlider(liqSlider);};
+
+gasSlider.onchange = e => sendPost('/gas', {v:e.target.value});
+liqSlider.onchange = e => sendPost('/liq', {v:e.target.value});
+
+function sendPost(url, data){
+  	const opt = {method:'POST'};
+  	if(data){
+  		opt.headers = {'Content-Type':'application/json'};
+  		opt.body = JSON.stringify(data);}
+  	fetch(url, opt);}
+
+function updateSlider(slider){
+  	const value = slider.value;
+  	slider.style.background =
+    	`linear-gradient(to right, #ADD8E6 ${value}%, rgba(0,200,255,0.25) ${value}%)`;}
+
+function emergency(){
+  	gasSlider.value = 0;
+  	liqSlider.value = 0;
+  	gtext.innerText = 0;
+  	ltext.innerText = 0;
+  	gasSlider.disabled = true;
+  	liqSlider.disabled = true;
+  	updateSlider(gasSlider);
+  	updateSlider(liqSlider);
+
+  	sendPost('/gas', {v:0});
+  	sendPost('/liq', {v:0});
+  	sendPost('/emergency', {operator: currentOperator});}
+function goToLog(){
+  window.open('/log', '_blank');}
+function goToAlarms(){
+  window.open('/alarms', '_blank');}
+function startMonitoring(){
+  	monitoringStarted = true;
+  	sendPost('/start');}
+
+function pauseMonitoring(){
+  	monitoringStarted = false;
+  	sendPost('/pause');}
+
+function resetSystem(){
+  	gasSlider.value = 70;
+  	liqSlider.value = 70;
+  	gasSlider.disabled = false;
+  	liqSlider.disabled = false;
+  	gtext.innerText = 70;
+  	ltext.innerText = 70;
+  	updateSlider(gasSlider);
+  	updateSlider(liqSlider);
+  	sendPost('/reset');}
+
+setTimeout(() => {
+  	upd();
+  	setInterval(upd,1000);
+	}, 1000);
+
+setInterval(updateTime,1000);
+updateSlider(gasSlider);
+updateSlider(liqSlider);
+function goToMonitor(){
+  // ищем вкладку мониторинга по имени
+  window.open('/', 'monitoring_tab');}
+
+</script>
+
+</body>
+</html>

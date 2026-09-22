@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>журнал событий</title>
+<style>
+
+* {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;}
+
+body {
+	background: #f4f6f9;
+	color: #1a1a2e;
+	font-family: Arial, sans-serif;
+	font-size: 15px;}
+
+.header {
+	background: #1a2235;
+	color: white;
+	padding: 14px 30px;
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	justify-content: space-between;}
+
+.header-title {
+	font-size: 25px;
+	font-weight: bold;
+	letter-spacing: 0.1em;
+	color: #7a9abf;}
+
+.btn {
+	padding: 7px 18px;
+	font-size: 20px;
+	font-weight: bold;
+	border: none;
+	border-radius: 10px;
+	cursor: pointer;
+	transition: 0.15s;
+	text-decoration: none;
+	display: inline-block;}
+
+.btn-ochist {
+	padding: 7px 18px;
+	font-size: 15px;
+	font-weight: bold;
+	border: 1px solid #c8d0df;
+	border-radius: 10px;
+	cursor: pointer;
+	transition: 0.15s;
+	text-decoration: none;
+	display: inline-block;
+	background: white;
+	color: #1a1a2e;
+	outline: none;}
+.btn-ochist:focus {
+	border-color: #4cc9f0;}
+
+.btn:hover { opacity: 0.85; }
+.btn-monitor, .btn-alarm { background: #2a3550; color: #e8eefc; }
+
+.underhead {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 12px 30px;
+	background: white;
+	border-bottom: 1px solid #dde3ed;
+	flex-wrap: wrap;}
+
+.underhead input,
+.underhead select {
+	border: 1px solid #c8d0df;
+	background: white;
+	color: #1a1a2e;
+	padding: 6px 10px;
+	border-radius: 10px;
+	font-size: 13px;
+	outline: none;}
+
+.underhead input {
+	width: 200px;
+}
+
+.underhead input:focus,
+.underhead select:focus {
+	border-color: #4cc9f0;
+}
+
+.underhead input::placeholder {
+	color: #1a1a2e;
+}
+
+.filter-obod{
+	position:relative;
+}
+
+.filter-btn{
+	border: 1px solid #c8d0df;
+	background: white;
+	color: #1a1a2e;
+	padding: 6px 10px;
+	border-radius: 10px;
+	font-size: 13px;
+	outline: none;
+	cursor:pointer;
+	min-width:130px;
+	text-align:left;
+	transition:0.15s;
+}
+
+
+.filter-box{
+	display:none;
+	position:absolute;
+	top:42px;
+	left:0;
+	background:white;
+	border:1px solid #c8d0df;
+	border-radius:10px;
+	width:130px;
+	padding:4px 0;
+	box-shadow:0 8px 20px rgba(0,0,0,0.08);
+	z-index:100;
+}
+.filter-box label{
+	display:flex;
+	align-items:center;
+	gap:10px;
+	padding:8px 12px;
+	font-size:13px;
+	cursor:pointer;
+	color:#1a1a2e;
+	font-weight:normal;
+}
+.filter-box label:hover{
+	background:#f5f7fb;
+}
+.filter-box input{
+	width:15px;
+	height:15px;
+	cursor:pointer;
+accent-color:white;
+}
+.filter-box span{
+	flex:1;
+}
+.filter-obod.open .filter-box{
+	display:block;
+}
+
+.counter {
+	margin-left: auto;
+	font-size: 10px;
+	color: #7a9abf;}
+
+.statists {
+	display: flex;
+	background: #dde3ed;
+	border-bottom: 2px solid #dde3ed;}
+
+.statists-box {
+	background: white;
+	padding: 10px 20px;
+	text-align: center;
+	flex: 1;}
+
+.statists-num {
+	font-size: 24px;
+	font-weight: bold;
+	color: #1a2235;}
+
+.statists-text {
+	font-size: 10px;
+	color: #7a9abf;
+	letter-spacing: 0.08em;
+	margin-top: 2px;}
+
+.tabl-skroll {
+	overflow-y: auto;
+	max-height: calc(100vh - 200px);}
+
+table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 10px;
+	min-width: 1100px;}
+
+thead th {
+	background: #e8edf5;
+	color: #3a4a6a;
+	padding: 8px 10px;
+	text-align: center;
+	border-bottom: 2px solid #c8d0df;
+	border-right: 1px solid #d0d8e8;
+	font-size: 10px;
+	letter-spacing: 0.07em;
+	font-weight: bold;
+	position: sticky;
+	top: 0;
+	z-index: 1;
+	white-space: nowrap;}
+
+thead th.left {
+	text-align: left;
+}
+
+tbody tr {
+	border-bottom: 1px solid #eaeef5;
+	background: white;
+}
+
+tbody tr:hover {
+	background: #f0f4fb;
+}
+
+
+td {
+	padding: 7px 10px;
+	vertical-align: middle;
+	border-right: 1px solid #eaeef5;
+	text-align: center;}
+
+td.left {
+	text-align: left;
+}
+
+.id-col   { color: #aab5c8; font-size: 11px; width: 45px; }
+.time-col { color: #3a4a6a; font-family: monospace; white-space: nowrap; }
+.cat-col  { font-size: 10px; font-weight: bold; color: #3a4a6a; letter-spacing: 0.05em; }
+.tag-col  { font-weight: bold; color: #1a2235; font-family: monospace; }
+.opis-col { color: #1a1a2e; text-align: left; }
+
+.znach-col {
+	font-family: monospace;
+	font-size: 10px;
+	font-weight: bold;
+	color: #1a2235;}
+
+.znach-normal { color: #3a4a6a; }
+.znach-warn   { color: #9a6a00; }
+.znach-alarm  { color: #9a1a1a; }
+.znach-empty  { color: #c0c8d8; }
+
+.badge {
+	display: inline-block;
+	padding: 2px 8px;
+	border-radius: 4px;
+	font-size: 10px;
+	font-weight: bold;
+	letter-spacing: 0.05em;}
+
+.badge-INFO      { background:#e8f4fb; color:#1a6a9a; border:1px solid #b8d8f0; }
+.badge-WARNING   { background:#fef9e7; color:#9a6a00; border:1px solid #f0d898; }
+.badge-ALARM     { background:#fdf0f0; color:#9a1a1a; border:1px solid #f0b8b8; }
+.badge-EMERGENCY { background:#fde8e8; color:#7a0000; border:1px solid #e88888; font-size:9px; }
+.badge-RESET     { background:#eafaf1; color:#1a7a3a; border:1px solid #a8e4bc; }
+
+</style>
+</head>
+<body>
+
+<div class="header">
+	<div>
+		<div class="header-title">📋 ЖУРНАЛ СОБЫТИЙ</div>
+	</div>
+
+	<div style="display:flex; gap:16px; flex-shrink:0;">
+		<button class="btn btn-monitor" onclick="window.close()">← мониторинг</button>
+		<a class="btn btn-alarm" href="/alarms" target="_blank">журнал аварий</a>
+	</div>
+</div>
+
+<div class="underhead">
+
+	<input type="text"
+		id="search"
+		placeholder="🔍  Поиск..."
+		oninput="logFunction()">
+
+	<div class="filter-obod" id="status-obod">
+
+	<button type="button" class="filter-btn">
+		Все статусы &#9660;
+	</button>
+
+	<div class="filter-box">
+
+		<label>
+			<input type="checkbox" id="status-all" checked>
+			<span>ВСЕ</span>
+		</label>
+
+		<label>
+			<input type="checkbox" value="INFO" checked>
+			<span>INFO</span>
+		</label>
+
+		<label>
+			<input type="checkbox" value="WARNING" checked>
+			<span>WARNING</span>
+		</label>
+
+		<label>
+			<input type="checkbox" value="ALARM" checked>
+			<span>ALARM</span>
+		</label>
+
+		<label>
+			<input type="checkbox" value="EMERGENCY" checked>
+			<span>EMERGENCY</span>
+		</label>
+
+		<label>
+			<input type="checkbox" value="RESET" checked>
+			<span>RESET</span>
+		</label>
+
+	</div>
+
+</div>
+
+	<div class="filter-obod">
+
+		<button type="button" class="filter-btn">
+			Все категории &#9660;
+		</button>
+
+		<div class="filter-box">
+			<label>
+	<input type="checkbox" id="cat-all" checked>
+	<span>ВСЕ</span>
+</label>
+
+			<label>
+				<input type="checkbox" value="ДАННЫЕ" checked>
+				<span>ДАННЫЕ</span>
+			</label>
+
+			<label>
+				<input type="checkbox" value="КЛАПАНЫ" checked>
+				<span>КЛАПАНЫ</span>
+			</label>
+
+			<label>
+				<input type="checkbox" value="ПРЕДЕЛЫ" checked>
+				<span>ПРЕДЕЛЫ</span>
+			</label>
+
+			<label>
+				<input type="checkbox" value="АВАРИЯ" checked>
+				<span>АВАРИЯ</span>
+			</label>
+
+			<label>
+				<input type="checkbox" value="СИСТЕМА" checked>
+				<span>СИСТЕМА</span>
+			</label>
+
+		</div>
+	</div>
+
+	<button class="btn-ochist" onclick="clearLog()">
+		🗑 Очистить записи
+	</button>
+
+	<span class="counter" id="counter">
+		загрузка...
+	</span>
+
+</div>
+
+<div class="statists">
+
+	<div class="statists-box">
+		<div class="statists-text">ВСЕГО ЗАПИСЕЙ</div>
+		<div class="statists-num" id="s-all">0</div>
+	</div>
+
+	<div class="statists-box">
+		<div class="statists-text">ПРЕДУПРЕЖДЕНИЙ</div>
+		<div class="statists-num" id="s-warn" style="color:#9a6a00">0</div>
+	</div>
+
+	<div class="statists-box">
+		<div class="statists-text">ТРЕВОГ</div>
+		<div class="statists-num" id="s-alarm" style="color:#9a1a1a">0</div>
+	</div>
+
+	<div class="statists-box">
+		<div class="statists-text">АВАРИЙ</div>
+		<div class="statists-num" id="s-emerg" style="color:#7a0000">0</div>
+	</div>
+
+	<div class="statists-box">
+		<div class="statists-text">ДЕЙСТВИЙ ОПЕРАТОРА</div>
+		<div class="statists-num" id="s-oper" style="color:#1a4a8a">0</div>
+	</div>
+
+</div>
+
+<div class="tabl-skroll">
+
+<table>
+
+	<thead>
+		<tr>
+			<th class="left">#</th>
+			<th class="left">ВРЕМЯ</th>
+			<th class="left">КАТЕГОРИЯ</th>
+			<th class="left">ТЕГ</th>
+			<th class="left">ОПИСАНИЕ</th>
+			<th>FG<br><small>м³/ч</small></th>
+			<th>FL<br><small>л/ч</small></th>
+			<th>P<br><small>бар</small></th>
+			<th>L<br><small>%</small></th>
+			<th>T<br><small>°C</small></th>
+			<th>C<br><small>—</small></th>
+			<th>ΔP<br><small>бар</small></th>
+			<th>ЭФФ<br><small>%</small></th>
+			<th>СТАТУС</th>
+		</tr>
+	</thead>
+
+	<tbody id="tablbody"></tbody>
+
+</table>
+
+</div>
+
+<script>
+
+let allData = [];
+
+function razbivStrok(val){
+  	const result = {};
+  	if(!val) return result;
+  	val.split(' ').forEach(p => {
+  		const [k, v] = p.split('=');
+  		if(k && v !== undefined) result[k] = v;});
+  	return result;}
+
+function znachGen(v, warnVal, alarmVal, decimals){
+  	if(v === undefined || v === '')
+  		return '<td class="znach-col znach-empty">—</td>';
+  	const num = parseFloat(v);
+  	let cls = 'znach-normal';
+  	if(alarmVal !== null && num >= alarmVal) cls = 'znach-alarm';
+  	else if(warnVal !== null && num >= warnVal) cls = 'znach-warn';
+  	return `<td class="znach-col ${cls}">${num.toFixed(decimals)}</td>`;}
+
+async function clearLog(){
+  	await fetch('/api/clear_journal', {method:'POST'});
+  	allData = [];
+  	logFunction();}
+
+async function load(){
+  	const r = await fetch('/api/journal');
+  	allData = await r.json();
+  	logFunction();}
+
+function countSeries(status){
+  	let count = 0;
+  	let inSeries = false;
+  	allData.forEach(e => {
+  		if(e.category === 'КЛАПАНЫ' || e.category === 'СИСТЕМА') return;
+  		if(e.status === status && !inSeries){
+  			count++;
+  			inSeries = true;}
+  		else if(e.status !== status){
+  			inSeries = false;}});
+  	return count;}
+
+function calcStatus(v, s){
+    if(s === 'EMERGENCY') return 'EMERGENCY';
+    if(parseFloat(v['P']) >= 1.9 || parseFloat(v['L']) > 85 || parseFloat(v['C']) > 0.40) return 'ALARM';
+    if(parseFloat(v['P']) > 1.6 || parseFloat(v['L']) > 75 || parseFloat(v['C']) > 0.20) return 'WARNING';
+    return s;}
+
+function logFunction(){
+  	const qtext = document.getElementById('search').value.toLowerCase();
+
+  	const okStatus = [...document.querySelectorAll('#status-obod .filter-box input:checked')]
+  		.map(cb => cb.value).filter(v => v);
+
+  	const okCats = [...document.querySelectorAll('.filter-obod:nth-of-type(2) .filter-box input:checked')]
+  		.map(cb => cb.value).filter(v => v);
+
+  	let filterList = allData.filter(e => {
+  		if(!okStatus.includes(e.status)) return false;
+  		if(!okCats.includes(e.category)) return false;
+  		if(qtext && !(e.timestamp || '').includes(qtext)) return false;
+  		return true;});
+
+  	filterList = [...filterList].reverse();
+
+  	document.getElementById('counter').innerText = filterList.length + ' записей';
+  	document.getElementById('s-all').innerText = allData.length;
+  	document.getElementById('s-warn').innerText = countSeries('WARNING');
+  	document.getElementById('s-alarm').innerText = countSeries('ALARM');
+  	document.getElementById('s-emerg').innerText = countSeries('EMERGENCY');
+
+  	let operCount = 0;
+  	let lastClupTag = '';
+  	allData.filter(e => e.category === 'КЛАПАНЫ').forEach(e => {
+  		if(e.tag !== lastClupTag){
+  			operCount++;
+  			lastClupTag = e.tag;}});
+  	document.getElementById('s-oper').innerText = operCount;
+
+  	const getZn = (isData, key, warn, alarm, dec) =>
+  		isData ? znachGen(key, warn, alarm, dec) : '<td class="znach-empty">—</td>';
+
+  	document.getElementById('tablbody').innerHTML = filterList.map(e => {
+  		const v = razbivStrok(e.value || '');
+  		const isData = e.category === 'ДАННЫЕ';
+  		return `
+  		<tr>
+  			<td class="id-col left">${e.id}</td>
+  			<td class="time-col left">${e.timestamp}</td>
+  			<td class="cat-col left">${e.category}</td>
+  			<td class="tag-col left">${e.tag}</td>
+  			<td class="opis-col">${e.description}</td>
+  			${getZn(isData, v['FG'], 100, 120, 1)}
+  			${getZn(isData, v['FL'], 40, 60, 1)}
+  			${getZn(isData, v['P'], 1.6, 1.9, 2)}
+  			${getZn(isData, v['L'], 75, 85, 1)}
+  			${getZn(isData, v['T'], 45, 60, 1)}
+  			${getZn(isData, v['C'], 0.2, 0.4, 3)}
+  			${getZn(isData, v['ΔP'], 0.7, 1.2, 3)}
+  			${getZn(isData, v['Эфф'], null, null, 1)}
+  			<td><span class="badge badge-${calcStatus(v, e.status)}">${calcStatus(v, e.status)}</span></td>
+  		</tr>`;}).join('');}
+
+// открытие/закрытие выпадающих фильтров
+document.querySelectorAll('.filter-obod').forEach(filterEl => {
+  	const btn = filterEl.querySelector('.filter-btn');
+  	btn.onclick = () => {
+  		document.querySelectorAll('.filter-obod').forEach(el => {
+  			if(el !== filterEl) el.classList.remove('open');});
+  		filterEl.classList.toggle('open');};});
+
+// клик вне фильтра — закрываем
+document.addEventListener('click', e => {
+  	document.querySelectorAll('.filter-obod').forEach(filterEl => {
+  		if(!filterEl.contains(e.target)) filterEl.classList.remove('open');});});
+
+// любой чекбокс — перерисовать
+document.querySelectorAll('.filter-box input').forEach(cb =>
+  	cb.addEventListener('change', logFunction));
+
+// чекбокс "ВСЕ" управляет остальными в своей группе
+function doAllBox(allId, selector){
+  	const allBox = document.getElementById(allId);
+  	const boxes = [...document.querySelectorAll(selector)].filter(cb => cb.id !== allId);
+
+  	allBox.addEventListener('change', () => {
+  		boxes.forEach(cb => { cb.checked = allBox.checked; });
+  		logFunction();});
+
+  	boxes.forEach(cb => {
+  		cb.addEventListener('change', () => {
+  			allBox.checked = boxes.filter(x => x.checked).length === boxes.length;
+  			logFunction();});});}
+
+doAllBox('status-all', '#status-obod .filter-box input');
+doAllBox('cat-all', '.filter-obod:nth-of-type(2) .filter-box input');
+
+load();
+setInterval(load, 2000);
+</script>
+</body>
+</html>
